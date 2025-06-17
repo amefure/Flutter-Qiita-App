@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:qiita_demo_app/views/article_list_view.dart';
+import 'package:qiita_demo_app/repository/QiitaRepository.dart';
+import 'package:qiita_demo_app/services/api_service.dart';
+import 'package:qiita_demo_app/views/qiita_list_screen.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final repository = QiitaRepository(apiService: ApiService());
 
-  // This widget is the root of your application.
+  MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: ArticleListView(),
+      home: QiitaListScreen(repository: repository),
     );
   }
 }
