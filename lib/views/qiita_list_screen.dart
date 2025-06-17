@@ -20,9 +20,14 @@ class QiitaListScreen extends StatelessWidget {
             return Center(child: CircularProgressIndicator());
           }
 
-          // エラーが出たら表示
+          // エラー表示
           if (snapshot.hasError) {
             return Center(child: Text('エラー: ${snapshot.error}'));
+          }
+
+          // データがない場合
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text('データが見つかりません'));
           }
 
           final items = snapshot.data!;
@@ -33,9 +38,7 @@ class QiitaListScreen extends StatelessWidget {
               return ListTile(
                 title: Text(item.title),
                 subtitle: Text('投稿者: ${item.userId}'),
-                onTap: () {
-                  // WebViewやブラウザで開くなど
-                },
+                onTap: null,
               );
             },
           );
