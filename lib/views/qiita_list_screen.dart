@@ -1,48 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:qiita_demo_app/models/qiita_item.dart';
-import 'package:qiita_demo_app/repository/QiitaRepository.dart';
+import 'package:qiita_demo_app/models/query.dart';
+import 'package:qiita_demo_app/providers/qiita_provider.dart';
 
-class QiitaListScreen extends StatelessWidget {
-  final QiitaRepository repository;
+/// 記事取得 Provider
+final qiitaItemsProvider = FutureProvider.autoDispose.family<List<QiitaItem>, Query>((ref, query) async {
+  final repository = ref.watch(qiitaProvider);
+  return repository.fetchLatestItems(page: query.page, perPage: query.perPage);
+});
 
-  const QiitaListScreen({super.key, required this.repository});
+class QiitaListScreen extends ConsumerWidget {
+  const QiitaListScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final query = Query(page: 1, perPage: 10);
+    final asyncItems = ref.watch(qiitaItemsProvider(query));
+
     return Scaffold(
       appBar: AppBar(title: const Text('Qiita記事一覧')),
-      body: FutureBuilder<List<QiitaItem>>(
-        future: repository.fetchLatestItems(),
-        builder: (context, snapshot) {
-
-          // 通信中
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          }
-
-          // エラー表示
-          if (snapshot.hasError) {
-            return Center(child: Text('エラー: ${snapshot.error}'));
-          }
-
-          // データがない場合
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('データが見つかりません'));
-          }
-
-          final items = snapshot.data!;
-          return ListView.builder(
-            itemCount: items.length,
-            itemBuilder: (_, index) {
-              final item = items[index];
-              return ListTile(
-                title: Text(item.title),
-                subtitle: Text('投稿者: ${item.userId}'),
-                onTap: null,
-              );
-            },
-          );
-        },
+      body: asyncItems.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, _) => Center(child: Text('エラー: $e')),
+        data: (items) => ListView.builder(
+          itemCount: items.length,
+          itemBuilder: (_, index) {
+            final item = items[index];
+            return ListTile(
+              title: Text(item.title),
+              subtitle: Text('投稿者: ${item.userId}'),
+            );
+          },
+        ),
       ),
     );
   }

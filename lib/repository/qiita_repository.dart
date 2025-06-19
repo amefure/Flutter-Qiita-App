@@ -16,7 +16,12 @@ class QiitaRepository {
       {int page = 1, int perPage = 10}) async {
     try {
       final response = await apiService.get(
-          '/items?page=$page&per_page=$perPage');
+          '/items?page=$page&per_page=$perPage',
+          // https://qiita.com/settings/applications から発行する
+          // headers: {
+          //   'Authorization': 'Bearer 認証トークン',
+          // }
+      );
       if (response.statusCode == 200) {
         final List<dynamic> jsonList = jsonDecode(response.body);
         return jsonList.map((e) => QiitaItem.fromJson(e)).toList();
