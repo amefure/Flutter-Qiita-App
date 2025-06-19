@@ -12,8 +12,7 @@ class QiitaRepository {
   QiitaRepository({required this.apiService});
 
   /// 最新の記事を取得する
-  Future<List<QiitaItem>> fetchLatestItems(
-      {int page = 1, int perPage = 10}) async {
+  Future<List<QiitaItem>> fetchLatestItems({int page = 1, int perPage = 10}) async {
     try {
       final response = await apiService.get(
           '/items?page=$page&per_page=$perPage',
